@@ -11,33 +11,52 @@ class View {
 
 	private $template;
 
-	private $scope;
+	private $user;
+
+	private $flashMessages;
+
+	private $variables;
 
 
 	public function setTemplate($template)
 	{
-		if (!file_exists($this->templatesPath . $template)) {
-			exit('Failed: template file does not exist');
-		}
-
 		$this->template = $template;
 	}
 
-	public function setScope($scope)
+	public function setUser($user)
 	{
-		$this->scope = $scope;
+		$this->user = $user;
+	}
+
+	public function setFlashMessages($flashMessages)
+	{
+		$this->flashMessages = $flashMessages;
+	}
+
+	public function setVariables($variables)
+	{
+		$this->variables = $variables;
 	}
 
 	public function render()
 	{
+		if (!file_exists($this->templatesPath . $this->template)) {
+			exit('Failed: template file does not exist');
+		}
+
 		$basePath = URL;
 		$templatesPath = $this->templatesPath;
 		$template = $this->template;
 
-		foreach ($this->scope as $key => $value) {
+		foreach ($this->variables as $key => $value) {
 			${$key} = $value;
 		}
 
+		$user = $this->user;
+		$flashMessages = $this->flashMessages;
+
+		//var_dump(get_defined_vars());
+		
 		include($templatesPath . 'layout.php');		
 	}
 

@@ -2,13 +2,19 @@
 
 namespace App\Controllers;
 
+use App\User;
 use App\View;
 
 
 abstract class AbstractController {
 
-	protected $scope = [];
+	const FLASH_MESSAGES_NAME = 'flashMessages';
 
+	protected $user;
+
+	protected $flashes = [];
+
+	protected $template = [];
 
 
 	public function init($action)
@@ -20,6 +26,29 @@ abstract class AbstractController {
 
 	protected function startup()
 	{
+		// user
+		$users = [
+			1 => new User('Sample User'),
+		];
+
+		if (isset($_SESSION['id'])) {
+			$this->user = $users[$_SESSION['id']];
+			$this->user->setLoggedIn($_SESSION['loggedIn']);
+		} else {
+			$this->user = new User('anonymous');
+		}
+
+		// flashes
+		$time = microtime(true);
+		foreach ($_SESSION[self::FLASH_MESSAGES_NAME] as $key => $flashMessage) {
+			$flashMessage = json_decode($flashMessage, true);
+
+			if (($time - $flashMessage['created']) > 0.5) {
+				unset($_SESSION[self::FLASH_MESSAGES_NAME][$key]);
+			} else {
+				$this->flashes[] = $flashMessage;
+			}
+		}
 	}
 
 	protected function run($action)
@@ -32,22 +61,56 @@ abstract class AbstractController {
 		$view = new View;
 		$view->setTemplate($template);
 
-		// check if render method exists
-		$method = $this->getRenderMethodName($action);
+		// check if action method exists
+		$method = $this->getMethodName($action, $_SERVER['REQUEST_METHOD']);
 		if (method_exists($this, $method) === false) {
 			exit('Failed: action method does not exist');
 		}
 
-		// run render method
+		// run the action method
 		$this->{$method}();
 
-		// set template variables and render view
-		$view->setScope($this->scope);
+		// set template variables
+		$view->setUser($this->user);
+		$view->setFlashMessages($this->flashes);
+		$view->setVariables($this->template);
+
+		// render the template
 		$view->render();
 	}
 
 	protected function shutdown()
 	{
+		exit;
+	}
+
+	protected function addFlashMessage($message, $type = 'info')
+	{
+		$_SESSION[self::FLASH_MESSAGES_NAME][] = json_encode([
+			'text' => $message,
+			'type' => $type,
+			'created' => microtime(true),
+		]);
+	}
+
+	protected function generatePath($controller, $action = 'default', $nice = true)
+	{
+		$setAction = $action && $action != 'default';
+
+		if ($nice) {
+			return URL . $controller . ($setAction ? '/' . $action : '');
+		} else {
+			return URL . 'index.php?controller=' . $controller . ($setAction ? '&action=' . $action : '');
+		}
+	}
+
+	protected function redirect($path, $statusCode = 303)
+	{
+		if (headers_sent()) {
+			exit('Failed: headers are already sent, cannot redirect');
+		}
+
+		header('Location: ' . $path, true, $statusCode);
 		exit;
 	}
 
@@ -66,9 +129,15 @@ abstract class AbstractController {
 		return str_replace('Controller', '', $this->getSimpleClassName());
 	}
 
-	private function getRenderMethodName($action)
+	private function getMethodName($action, $method = 'GET')
 	{
-		return 'render' . ucfirst($action);
+		switch ($method) {
+			case 'GET':
+				return 'get' . ucfirst($action);
+
+			case 'POST':
+				return 'post' . ucfirst($action);
+		}		
 	}
 
 }

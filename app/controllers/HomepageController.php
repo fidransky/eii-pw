@@ -22,16 +22,16 @@ class HomepageController extends AbstractController {
 		//$this->db->__destruct();
 	}
 
-	public function renderDefault()
+	public function getDefault()
 	{
-		$this->scope['title'] = 'Homepage';
-		$this->scope['foo'] = 'bar';
+		$this->template['title'] = 'Homepage';
+		$this->template['foo'] = 'bar';
 	}
 
-	public function renderOther()
+	public function getOther()
 	{
-		$this->scope['title'] = 'Other';
-		$this->scope['lorem'] = 'ipsum';
+		$this->template['title'] = 'Other';
+		$this->template['lorem'] = 'ipsum';
 	}
 	
 }
