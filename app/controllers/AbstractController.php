@@ -4,18 +4,26 @@ namespace App\Controllers;
 
 use App\User;
 use App\View;
+use App\Models\User\UserManager;
 
 
 abstract class AbstractController {
 
 	const FLASH_MESSAGES_NAME = 'flashMessages';
+	const FLASH_MESSAGES_TIMEOUT = 0.5;
 
 	protected $user;
 
 	protected $flashes = [];
-
 	protected $template = [];
 
+	protected $userManager;
+
+
+	public function __construct()
+	{
+		$this->userManager = new UserManager;
+	}
 
 	public function init($action)
 	{
@@ -27,26 +35,27 @@ abstract class AbstractController {
 	protected function startup()
 	{
 		// user
-		$users = [
-			1 => new User('Sample User'),
-		];
-
 		if (isset($_SESSION['id'])) {
-			$this->user = $users[$_SESSION['id']];
+			$user = $this->userManager->get($_SESSION['id']);
+
+			$this->user = new User($user['name'], $user['role']);
 			$this->user->setLoggedIn($_SESSION['loggedIn']);
+
 		} else {
-			$this->user = new User('anonymous');
+			$this->user = new User(null, null);
 		}
 
 		// flashes
-		$time = microtime(true);
-		foreach ($_SESSION[self::FLASH_MESSAGES_NAME] as $key => $flashMessage) {
-			$flashMessage = json_decode($flashMessage, true);
+		if (isset($_SESSION[self::FLASH_MESSAGES_NAME])) {
+			$time = microtime(true);
+			foreach ($_SESSION[self::FLASH_MESSAGES_NAME] as $key => $flashMessage) {
+				$flashMessage = json_decode($flashMessage, true);
 
-			if (($time - $flashMessage['created']) > 0.5) {
-				unset($_SESSION[self::FLASH_MESSAGES_NAME][$key]);
-			} else {
-				$this->flashes[] = $flashMessage;
+				if (($time - $flashMessage['created']) > self::FLASH_MESSAGES_TIMEOUT) {
+					unset($_SESSION[self::FLASH_MESSAGES_NAME][$key]);
+				} else {
+					$this->flashes[] = $flashMessage;
+				}
 			}
 		}
 	}

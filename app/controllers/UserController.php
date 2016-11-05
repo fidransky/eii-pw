@@ -3,7 +3,7 @@
 namespace App\Controllers;
 
 
-class BackendController extends AbstractSecuredController {
+class UserController extends AbstractSecuredController {
 
 	public function getDefault()
 	{

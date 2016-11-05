@@ -40,12 +40,15 @@
 
 				<div id="navbar" class="collapse navbar-collapse">
 					<ul class="nav navbar-nav">
-						<li><a href="./homepage">Home</a></li>
-						<li><a href="./homepage/other">Other</a></li>
+						<li><a href="./">Home</a></li>
 						<?php if (!$user->isLoggedIn()): ?>
 							<li><a href="./log/in">Log in</a></li>
-						<?php else: ?>
-							<li><a href="./backend">Backend</a></li>
+							<li><a href="./sign/in">Sign in</a></li>
+						<?php endif; ?>
+					</ul>
+					<ul class="nav navbar-nav pull-right">
+						<?php if ($user->isLoggedIn()): ?>
+							<li><a href="./user"><?=$user->name?></a></li>
 							<li><a href="./log/out">Log out</a></li>
 						<?php endif; ?>
 					</ul>

@@ -23,40 +23,22 @@ if (isset($_GET['page'])) {
 	$page = ucfirst($_GET['page']);
 
 	switch ($page) {
-		case 'Homepage':
-			$controller = 'Homepage';
-			break;
-
-		case 'Log':
-			$controller = 'Log';
-			break;
-
-		case 'Backend':
-			$controller = 'Backend';
-			break;
-
 		default:
-			$controller = $default['controller'];
+			if (empty($page)) {
+				$controller = $default['controller'];
+			} else {
+				$controller = $page;
+			}
 	}
 
 	if (isset($_GET['action'])) {
 		$action = $_GET['action'];		
 
 		switch ($action) {
-			case 'other':
-				$action = 'other';
-				break;
-
-			case 'in':
-				$action = 'in';
-				break;
-
-			case 'out':
-				$action = 'out';
-				break;
-
 			default:
-				$action = $default['action'];
+				if (empty($action)) {
+					$action = $default['action'];
+				}
 		}
 	} else {
 		$action = $default['action'];
