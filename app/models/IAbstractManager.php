@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+
 /**
  * Base interface of entity manager.
  *

@@ -6,6 +6,9 @@ use \PDO;
 use \PDOException;
 
 
+/**
+ * @author Pavel Fidransky [jsem@pavelfidransky.cz]
+ */
 class Database {
 
 	const SQL_HOST = 'localhost';
@@ -13,6 +16,7 @@ class Database {
 	const SQL_USERNAME = 'admin';
 	const SQL_PASSWORD = 'admin';
 
+	/** @var \PDO */
 	private $connection;
 
 

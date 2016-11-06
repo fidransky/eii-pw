@@ -2,22 +2,22 @@
 
 namespace App\Controllers;
 
-use App\Models\League\LeagueManager;
 use App\Models\Team\TeamManager;
+use App\Models\League\LeagueManager;
 
 
 class TeamController extends AbstractSecuredController {
 
-	private $leagueManager;
 	private $teamManager;
+	private $leagueManager;
 
 
 	public function __construct()
 	{
 		parent::__construct();
 
-		$this->leagueManager = new LeagueManager;
 		$this->teamManager = new TeamManager;
+		$this->leagueManager = new LeagueManager;
 	}
 
 	public function getDefault()
@@ -30,6 +30,7 @@ class TeamController extends AbstractSecuredController {
 	{
 		$this->template['title'] = 'Add a new team';
 		$this->template['addHandler'] = $this->generatePath('team', 'add');
+		$this->template['leagues'] = $this->getLeagues();
 	}
 
 	public function getEdit()
@@ -38,8 +39,10 @@ class TeamController extends AbstractSecuredController {
 
 		$this->template['title'] = 'Edit team';
 		$this->template['editHandler'] = $this->generatePath('team', 'edit') . '?teamId=' . $id;
+		$this->template['leagues'] = $this->getLeagues();
 
 		$this->template['team'] = $this->teamManager->get($id);
+		$this->template['team']['league'] = $this->teamManager->getLeague($id);
 	}
 
 	public function getDelete()
@@ -91,6 +94,11 @@ class TeamController extends AbstractSecuredController {
 		$this->redirect($path);
 	}
 
+	private function getLeagues()
+	{
+		return $this->leagueManager->getAll();
+	}
+
 	private function constructTeam()
 	{
 		if (empty($_POST['name'])) {
@@ -103,6 +111,7 @@ class TeamController extends AbstractSecuredController {
 		return [
 			'name' => $_POST['name'],
 			'stadium' => $_POST['stadium'],
+			'leagueId' => $_POST['league'],
 		];		
 	}
 

@@ -4,21 +4,25 @@
 </h1>
 
 <table class="table">
-	<thead>
-		<tr>
-			<th>Name</th>
-			<td></td>
-		</tr>
-	</thead>
-	<tbody>
-		<?php foreach ($players as $player): ?>
-		<tr>
-			<td><?=$player['name']?></td>
-			<td>
-				<a href="./player/edit?playerId=<?=$player['id']?>">edit</a>
-				<a href="./player/delete?playerId=<?=$player['id']?>">remove</a>
-			</td>
-		</tr>
-		<?php endforeach; ?>
-	</tbody>
+	<?php if (count($players) === 0): ?>
+		<caption>There are no players yet.</caption>
+	<?php else: ?>
+		<thead>
+			<tr>
+				<th>Name</th>
+				<td></td>
+			</tr>
+		</thead>
+		<tbody>
+			<?php foreach ($players as $player): ?>
+			<tr>
+				<td><?=$player['name']?></td>
+				<td>
+					<a href="./player/edit?playerId=<?=$player['id']?>">edit</a>
+					<a href="./player/delete?playerId=<?=$player['id']?>">remove</a>
+				</td>
+			</tr>
+			<?php endforeach; ?>
+		</tbody>
+	<?php endif; ?>
 </table>

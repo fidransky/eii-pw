@@ -10,7 +10,9 @@ use \PDO;
  */
 abstract class AbstractManager implements IAbstractManager {
 
+	/** @var Database */
 	protected $database;
+	/** @var string */
 	protected $tableName;
 
 

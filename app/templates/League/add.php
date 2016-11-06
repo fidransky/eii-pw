@@ -8,9 +8,9 @@
 
 	<div class="form-group">
 		<label for="season">Season</label>
-		<select name="season" id="season">
+		<select name="season" class="form-control" id="season">
 			<?php foreach ($seasons as $key => $season): ?>
-			<option value="<?=$season?>"><?=$season?></option>
+				<option value="<?=$season?>"><?=$season?></option>
 			<?php endforeach; ?>
 		</select>
 	</div>

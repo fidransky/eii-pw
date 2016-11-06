@@ -18,7 +18,7 @@
 		<link href="<?=$basePath?>css/style.css" rel="stylesheet" media="all">
 
 		<title>
-			App
+			<?=$appName?>
 			<?php if (!empty($title)): ?>
 				> <?=$title?>
 		 	<?php endif; ?>
@@ -35,7 +35,7 @@
 						<span class="icon-bar"></span>
 						<span class="icon-bar"></span>
 					</button>
-					<a class="navbar-brand" href="./">App</a>
+					<a class="navbar-brand" href="./"><?=$appName?></a>
 				</div>
 
 				<div id="navbar" class="collapse navbar-collapse">

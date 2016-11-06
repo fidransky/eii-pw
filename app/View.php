@@ -3,18 +3,22 @@
 namespace App;
 
 
+/**
+ * @author Pavel Fidransky [jsem@pavelfidransky.cz]
+ */
 class View {
 
+	/** @var string */
 	private $basePath = __DIR__ . '/../www/';
-
+	/** @var string */
 	private $templatesPath = __DIR__ . '/' . TEMPLATES_DIR;
-
+	/** @var string */
 	private $template;
-
+	/** @var User */
 	private $user;
-
+	/** @var array */
 	private $flashMessages;
-
+	/** @var array */
 	private $variables;
 
 
@@ -54,6 +58,7 @@ class View {
 
 		$user = $this->user;
 		$flashMessages = $this->flashMessages;
+		$appName = 'App';
 
 		//var_dump(get_defined_vars());
 		

@@ -3,6 +3,9 @@
 namespace App;
 
 
+/**
+ * @author Pavel Fidransky [jsem@pavelfidransky.cz]
+ */
 class User {
 
 	/** @var string */
