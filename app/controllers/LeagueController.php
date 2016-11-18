@@ -100,9 +100,9 @@ class LeagueController extends AbstractSecuredController {
 	private function getSeasons()
 	{
 		$seasons = [];
-		$year = date('Y');
+		$year = date('Y') - 5;
 
-		for ($i = 0; $i < 5; $i++) {
+		for ($i = 0; $i < 10; $i++) {
 			$seasons[] = $year . ' - ' . ($year + 1);
 			$year++;
 		}

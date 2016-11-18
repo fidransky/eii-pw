@@ -3,15 +3,6 @@
 namespace App;
 
 
-// constants
-define('URL', 'http://localhost:8080/eii-pw/');
-define('LANG', 'en');
-define('TIMEZONE', 'Europe/London');
-
-// PHP settings
-session_start();
-date_default_timezone_set(TIMEZONE);
-
 // routes
 $default = [
 	'controller' => 'Homepage',

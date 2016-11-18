@@ -1,56 +1,33 @@
 <?php
 
+// constants
 define('APP_DIR', '../app/');
 define('CONTROLLERS_DIR', 'controllers/');
 define('TEMPLATES_DIR', 'templates/');
 
+define('URL', 'http://localhost:8080/eii-pw/');
+define('LANG', 'en');
+define('TIMEZONE', 'Europe/London');
 
-function browse($dir, $interfacesOnly) {
-	foreach (glob($dir . '*') as $path) {
-		if (is_file($path) && pathinfo($path, PATHINFO_EXTENSION) === 'php') {
-			$filename = pathinfo($path, PATHINFO_FILENAME);
-			$isInterface = substr($filename, 0, 1) == 'I' && ctype_upper(substr($filename, 0, 2));
+// PHP settings
+session_start();
+date_default_timezone_set(TIMEZONE);
 
-			if ($interfacesOnly && !$isInterface) continue;
+// autoloading
+spl_autoload_register(function($className) {
+	$parts = explode('\\', $className);
+	if ($parts[0] !== 'App') return;
 
-			include_once($path);
-		}
-
-		if (is_dir($path)) {
-			browse($path . '/', $interfacesOnly);
-		}
-	}
-}
-
-function autoload() {
-	$dirs = [
-		APP_DIR . 'models/',
-		APP_DIR . 'controllers/',
-		APP_DIR . 'utils/',
-	];
-
-	$files = [
-		APP_DIR . 'Database.php',
-		APP_DIR . 'User.php',
-		APP_DIR . 'View.php',
-	];
-
-	// autoload interfaces
-	foreach ($dirs as $dir) {
-		browse($dir, true);
+	array_shift($parts);
+	for ($i = 0; $i < count($parts) - 1; $i++) {
+		$parts[$i] = strtolower($parts[$i]);
 	}
 
-	// autoload the rest PHP classes
-	foreach ($dirs as $dir) {
-		browse($dir, false);
-	}
+	$path = APP_DIR . implode('/', $parts) . '.php';
+	//var_dump(array($className, $path));
 
-	foreach ($files as $file) {
-		include($file);
-	}
-
-	include(APP_DIR . 'bootstrap.php');
-}
+	include_once($path);
+});
 
 
-autoload();
+include(APP_DIR . 'bootstrap.php');
