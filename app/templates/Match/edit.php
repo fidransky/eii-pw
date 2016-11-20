@@ -3,7 +3,7 @@
 <form action="<?=$editHandler?>" method="post">
 	<div class="form-group">
 		<label for="date">Date and time</label>
-		<input type="datetime-local" name="date" value="<?=$match['date']?>" class="form-control" required>
+		<input type="datetime-local" name="date" value="<?=$match['date']->format('Y-m-d\TH:i:s')?>" class="form-control" required>
 	</div>
 
 	<div class="form-group">

@@ -23,21 +23,8 @@ class MatchController extends AbstractSecuredController {
 
 	public function getDefault()
 	{
-		$states = $this->getStates();
-
 		$this->template['title'] = 'Matches';
-		$this->template['matches'] = array_map(function($match) use ($states) {
-			$match['homeTeam'] = $this->teamManager->get($match['home_team_id']);
-			$match['visitingTeam'] = $this->teamManager->get($match['visiting_team_id']);
-
-			$match['date__raw'] = $match['date'];
-			$match['date'] = new DateTime($match['date__raw']);
-
-			$match['state__raw'] = (int) $match['state'];
-			$match['state'] = $states[$match['state__raw']];
-
-			return $match;
-		}, $this->matchManager->getAll());
+		$this->template['matches'] = array_map([$this, 'processMatch'], $this->matchManager->getAll());
 	}
 
 	public function getAdd()
@@ -68,7 +55,7 @@ class MatchController extends AbstractSecuredController {
 		$this->template['states'] = $this->getStates();
 		$this->template['teams'] = $this->getTeams();
 
-		$this->template['match'] = $this->matchManager->get($id);
+		$this->template['match'] = $this->processMatch($this->matchManager->get($id));
 		$this->template['match']['homeTeamPlayers'] = $this->matchManager->getPlayers($id, $this->template['match']['home_team_id']);
 		$this->template['match']['visitingTeamPlayers'] = $this->matchManager->getPlayers($id, $this->template['match']['visiting_team_id']);
 	}
@@ -170,6 +157,22 @@ class MatchController extends AbstractSecuredController {
 			'home_team_points' => 0,
 			'visiting_team_points' => 0,
 		];		
+	}
+
+	private function processMatch($match)
+	{
+		$states = $this->getStates();
+
+		$match['homeTeam'] = $this->teamManager->get($match['home_team_id']);
+		$match['visitingTeam'] = $this->teamManager->get($match['visiting_team_id']);
+
+		$match['date__raw'] = $match['date'];
+		$match['date'] = new DateTime($match['date__raw']);
+
+		$match['state__raw'] = (int) $match['state'];
+		$match['state'] = $states[$match['state__raw']];
+
+		return $match;
 	}
 
 }

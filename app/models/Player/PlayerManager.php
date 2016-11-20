@@ -16,11 +16,6 @@ class PlayerManager extends AbstractManager {
 		parent::__construct('player');
 	}
 
-	public function get($id)
-	{
-		return $this->resolvePost(parent::get($id));
-	}
-
 	public function saveWithTeams($data, $teams, $id = null)
 	{
 		try {
@@ -88,31 +83,6 @@ class PlayerManager extends AbstractManager {
 		return $this->database
 			->query($query, $args)
 			->fetchAll(PDO::FETCH_ASSOC);
-	}
-
-	private function resolvePost($player)
-	{
-		$player['post__raw'] = (int) $player['post'];
-
-		switch ($player['post']) {
-			case 0:
-				$player['post'] = 'goalkeeper';
-				break;
-
-			case 1:
-				$player['post'] = 'defender';
-				break;
-
-			case 2:
-				$player['post'] = 'midfielder';
-				break;
-
-			case 3:
-				$player['post'] = 'forward';
-				break;
-		}
-
-		return $player;
 	}
 
 }

@@ -22,15 +22,8 @@ class PlayerController extends AbstractSecuredController {
 
 	public function getDefault()
 	{
-		$posts = $this->getPosts();
-
 		$this->template['title'] = 'Players';
-		$this->template['players'] = array_map(function($player) use ($posts) {
-			$player['post__raw'] = (int) $player['post'];
-			$player['post'] = $posts[$player['post__raw']];
-
-			return $player;
-		}, $this->playerManager->getAll());
+		$this->template['players'] = array_map([$this, 'processPlayer'], $this->playerManager->getAll());
 	}
 
 	public function getAdd()
@@ -50,7 +43,7 @@ class PlayerController extends AbstractSecuredController {
 		$this->template['posts'] = $this->getPosts();
 		$this->template['teams'] = $this->getTeams();
 
-		$this->template['player'] = $this->playerManager->get($id);
+		$this->template['player'] = $this->processPlayer($this->playerManager->get($id));
 		$this->template['player']['teams'] = array_map(function($team) {
 			return $team['id'];
 		}, $this->playerManager->getTeams($id));
@@ -142,6 +135,14 @@ class PlayerController extends AbstractSecuredController {
 			'number' => $_POST['number'],
 			'post' => $_POST['post'],
 		];		
+	}
+
+	private function processPlayer($player)
+	{
+		$player['post__raw'] = (int) $player['post'];
+		$player['post'] = $posts[$player['post__raw']];
+
+		return $player;
 	}
 
 }

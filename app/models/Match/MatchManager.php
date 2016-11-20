@@ -3,7 +3,6 @@
 namespace App\Models\Match;
 
 use App\Models\AbstractManager;
-use \DateTime;
 use \PDO;
 
 
@@ -15,15 +14,6 @@ class MatchManager extends AbstractManager {
 	public function __construct()
 	{
 		parent::__construct('`match`');
-	}
-
-	public function get($id)
-	{
-		$match = parent::get($id);
-		$match = $this->resolveState($match);
-		$match = $this->formatDate($match);
-
-		return $match;
 	}
 
 	public function getOngoing()
@@ -107,37 +97,6 @@ class MatchManager extends AbstractManager {
 		return $this->database
 			->query($query, $args)
 			->fetchAll(PDO::FETCH_ASSOC);
-	}
-
-	private function resolveState($match)
-	{
-		$match['state__raw'] = (int) $match['state'];
-
-		switch ($match['state']) {
-			case 0:
-				$match['state'] = 'created';
-				break;
-
-			case 1:
-				$match['state'] = 'ongoing';
-				break;
-
-			case 2:
-				$match['state'] = 'ended';
-				break;
-		}
-
-		return $match;
-	}
-
-	private function formatDate($match)
-	{
-		$match['date__raw'] = $match['date'];
-
-		$date = new DateTime($match['date']);
-		$match['date'] = $date->format('Y-m-d\TH:i:s');
-
-		return $match;
 	}
 
 }
