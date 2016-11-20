@@ -134,6 +134,10 @@ ul {
 	border: 1px solid #ccc;
 }
 
+li .form-control {
+	display: inline-block;
+}
+
 select.form-control {
 	padding: 5px;
 }
@@ -217,14 +221,17 @@ select.form-control {
 
 .alert-info {
 	background-color: blue;
+	color: white;
 }
 
 .alert-success {
 	background-color: green;
+	color: white;
 }
 
 .alert-error {
 	background-color: red;
+	color: white;
 }
 
 /* tables */

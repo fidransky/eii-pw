@@ -21,43 +21,73 @@ class PlayerManager extends AbstractManager {
 		return $this->resolvePost(parent::get($id));
 	}
 
-	public function save($data, $id = null)
+	public function saveWithTeams($data, $teams, $id = null)
 	{
-		$teamId = $data['teamId'];
-		unset($data['teamId']);
+		try {
+			$this->database->startTransaction();
 
-		$result = parent::save($data, $id);
+			// save player
+			$result = $this->save($data, $id);
 
-		if ($result) {
-			if ($id) {
-				return true;
+			if ($result) {
+				$insertQuery = 'INSERT INTO team_player(team_id, player_id) VALUES (:teamId, :playerId)';
+				$deleteQuery = 'DELETE FROM team_player WHERE team_id = :teamId AND player_id = :playerId';
 
-			} else {
-				$query = 'INSERT INTO team_player(team_id, player_id) VALUES (:teamId, :playerId)';
-				$args = [
-					':teamId' => $teamId,
-					':playerId' => $result,
-				];
+				if ($id) {
+					$originalTeams = array_map(function($team) {
+						return $team['id'];
+					}, $this->getTeams($id));
 
-				$this->database->query($query, $args);
+					$added = array_diff($teams, $originalTeams);
+					$removed = array_diff($originalTeams, $teams);
 
-				return $result;
+				} else {
+					$id = $result;
+					$added = $teams;
+					$removed = [];
+				}
+
+				// save leagues
+				foreach ($added as $teamId) {
+					$args = [
+						':teamId' => $teamId,
+						':playerId' => $id,
+					];
+
+					$this->database->query($insertQuery, $args);
+				}
+
+				foreach ($removed as $teamId) {
+					$args = [
+						':teamId' => $teamId,
+						':playerId' => $id,
+					];
+
+					$this->database->query($deleteQuery, $args);
+				}
 			}
+
+			$this->database->commitTransaction();
+			return $result;
+
+		} catch (PDOException $e) {
+			$this->database->rollbackTransaction();
+			throw $e;
 		}
 
 		return false;
 	}
 
-	public function getTeam($playerId)
+	public function getTeams($playerId)
 	{
-		$query = 'SELECT team.* FROM team_player LEFT JOIN team ON team.id = team_player.team_id WHERE team_player.player_id = :playerId LIMIT 1';
+		$query = 'SELECT team.* FROM team_player LEFT JOIN team ON team.id = team_player.team_id WHERE team_player.player_id = :playerId';
 		$args = [
 			':playerId' => $playerId,
 		];
 
 		return $this->database
 			->query($query, $args)
-			->fetch(PDO::FETCH_ASSOC);		
+			->fetchAll(PDO::FETCH_ASSOC);
 	}
 
 	private function resolvePost($player)

@@ -10,6 +10,7 @@
 		<thead>
 			<tr>
 				<th>Name</th>
+				<th>Post</th>
 				<td></td>
 			</tr>
 		</thead>
@@ -17,6 +18,7 @@
 			<?php foreach ($players as $player): ?>
 			<tr>
 				<td><?=$player['name']?></td>
+				<td><?=$player['post']?></td>
 				<td>
 					<a href="./player/edit?playerId=<?=$player['id']?>">edit</a>
 					<a href="./player/delete?playerId=<?=$player['id']?>">remove</a>

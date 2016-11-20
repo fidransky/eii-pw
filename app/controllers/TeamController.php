@@ -42,7 +42,9 @@ class TeamController extends AbstractSecuredController {
 		$this->template['leagues'] = $this->getLeagues();
 
 		$this->template['team'] = $this->teamManager->get($id);
-		$this->template['team']['league'] = $this->teamManager->getLeague($id);
+		$this->template['team']['leagues'] = array_map(function($league) {
+			return $league['id'];
+		}, $this->teamManager->getLeagues($id));
 	}
 
 	public function getDelete()
@@ -62,17 +64,16 @@ class TeamController extends AbstractSecuredController {
 	public function postAdd()
 	{
 		$data = $this->constructTeam();
+		$leagues = isset($_POST['leagues']) ? $_POST['leagues'] : [];
 
 		try {
-			$result = $this->teamManager->save($data);
+			$result = $this->teamManager->saveWithLeagues($data, $leagues);
 
 			$this->addFlashMessage('The team was successfully created.', 'success');
-
 			$path = $this->generatePath('team');
 
 		} catch (\Exception $e) {
 			$this->addFlashMessage('The team was not created.', 'error');
-
 			$path = $this->generatePath('team', 'add');
 		}
 
@@ -84,13 +85,20 @@ class TeamController extends AbstractSecuredController {
 	{
 		$id = $_GET['teamId'];
 		$data = $this->constructTeam();
+		$leagues = isset($_POST['leagues']) ? $_POST['leagues'] : [];
 
-		$result = $this->teamManager->save($data, $id);
+		try {
+			$result = $this->teamManager->saveWithLeagues($data, $leagues, $id);
+
+			$this->addFlashMessage('The team was successfully saved.', 'success');
+			$path = $this->generatePath('team');
+
+		} catch (\Exception $e) {
+			$this->addFlashMessage('The team was not saved.', 'error');
+			$path = $this->generatePath('team', 'edit') . '?teamId=' . $id;
+		}
 
 		// redirect
-		$this->addFlashMessage('The team was successfully saved.', 'success');
-
-		$path = $this->generatePath('team');
 		$this->redirect($path);
 	}
 
@@ -111,7 +119,6 @@ class TeamController extends AbstractSecuredController {
 		return [
 			'name' => $_POST['name'],
 			'stadium' => $_POST['stadium'],
-			'leagueId' => $_POST['league'],
 		];		
 	}
 

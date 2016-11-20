@@ -8,6 +8,12 @@ define('TEMPLATES_DIR', 'templates/');
 define('URL', 'http://localhost:8080/eii-pw/');
 define('LANG', 'en');
 define('TIMEZONE', 'Europe/London');
+define('DEBUG', true);
+
+define('SQL_HOST', 'localhost');
+define('SQL_DBNAME', 'eii_pw');
+define('SQL_USERNAME', 'admin');
+define('SQL_PASSWORD', 'admin');
 
 // PHP settings
 session_start();
@@ -23,10 +29,10 @@ spl_autoload_register(function($className) {
 		$parts[$i] = strtolower($parts[$i]);
 	}
 
-	$path = APP_DIR . implode('/', $parts) . '.php';
-	//var_dump(array($className, $path));
+	$path = implode('/', $parts) . '.php';
+	//var_dump([$className, $path]);
 
-	include_once($path);
+	@include(APP_DIR . $path);
 });
 
 

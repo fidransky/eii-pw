@@ -4,6 +4,7 @@ namespace App\Models\Team;
 
 use App\Models\AbstractManager;
 use \PDO;
+use \PDOException;
 
 
 /**
@@ -16,43 +17,85 @@ class TeamManager extends AbstractManager {
 		parent::__construct('team');
 	}
 
-	public function save($data, $id = null)
+	public function saveWithLeagues($data, $leagues, $id = null)
 	{
-		$leagueId = $data['leagueId'];
-		unset($data['leagueId']);
+		try {
+			$this->database->startTransaction();
 
-		$result = parent::save($data, $id);
+			// save team
+			$result = $this->save($data, $id);
 
-		if ($result) {
-			if ($id) {
-				return true;
+			if ($result) {
+				$insertQuery = 'INSERT INTO league_team(league_id, team_id) VALUES (:leagueId, :teamId)';
+				$deleteQuery = 'DELETE FROM league_team WHERE league_id = :leagueId AND team_id = :teamId';
 
-			} else {
-				$query = 'INSERT INTO league_team(league_id, team_id) VALUES (:leagueId, :teamId)';
-				$args = [
-					':leagueId' => $leagueId,
-					':teamId' => $result,
-				];
+				if ($id) {
+					$originalLeagues = array_map(function($league) {
+						return $league['id'];
+					}, $this->getLeagues($id));
 
-				$this->database->query($query, $args);
+					$added = array_diff($leagues, $originalLeagues);
+					$removed = array_diff($originalLeagues, $leagues);
 
-				return $result;
+				} else {
+					$id = $result;
+					$added = $leagues;
+					$removed = [];
+				}
+
+				// save leagues
+				foreach ($added as $leagueId) {
+					$args = [
+						':leagueId' => $leagueId,
+						':teamId' => $id,
+					];
+
+					$this->database->query($insertQuery, $args);
+				}
+
+				foreach ($removed as $leagueId) {
+					$args = [
+						':leagueId' => $leagueId,
+						':teamId' => $id,
+					];
+
+					$this->database->query($deleteQuery, $args);
+				}
 			}
+
+			$this->database->commitTransaction();
+			return $result;
+
+		} catch (PDOException $e) {
+			$this->database->rollbackTransaction();
+			throw $e;
 		}
 
 		return false;
 	}
 
-	public function getLeague($teamId)
+	public function getLeagues($teamId)
 	{
-		$query = 'SELECT league.* FROM league_team LEFT JOIN league ON league.id = league_team.league_id WHERE league_team.team_id = :teamId LIMIT 1';
+		$query = 'SELECT league.* FROM league_team LEFT JOIN league ON league.id = league_team.league_id WHERE league_team.team_id = :teamId';
 		$args = [
 			':teamId' => $teamId,
 		];
 
 		return $this->database
 			->query($query, $args)
-			->fetch(PDO::FETCH_ASSOC);		
+			->fetchAll(PDO::FETCH_ASSOC);
+	}
+
+	public function getPlayers($teamId)
+	{
+		$query = 'SELECT player.* FROM team_player LEFT JOIN player ON player.id = team_player.player_id WHERE team_player.team_id = :teamId';
+		$args = [
+			':teamId' => $teamId,
+		];
+
+		return $this->database
+			->query($query, $args)
+			->fetchAll(PDO::FETCH_ASSOC);
 	}
 
 }

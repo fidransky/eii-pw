@@ -13,11 +13,13 @@
 
 	<div class="form-group">
 		<label for="league">League</label>
-		<select name="league" class="form-control" id="league">
-			<?php foreach ($leagues as $key => $league): ?>
-				<option value="<?=$league['id']?>"><?=$league['name']?></option>
-			<?php endforeach; ?>
-		</select>
+		<?php foreach ($leagues as $key => $league): ?>
+			<div class="checkbox">
+				<label for="league-<?=$league['id']?>">
+					<input type="checkbox" name="leagues[]" value="<?=$league['id']?>" id="league-<?=$league['id']?>"> <?=$league['name']?>
+				</label>
+			</div>
+		<?php endforeach; ?>
 	</div>
 
 	<button type="submit" class="btn btn-default">Save</button>

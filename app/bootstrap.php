@@ -2,6 +2,24 @@
 
 namespace App;
 
+use SplFileInfo;
+
+
+// debug information
+function fail($cause, $statusCode) {
+	echo($cause);
+
+	if (DEBUG) {
+		$stacktrace = debug_backtrace();
+		foreach ($stacktrace as $index => $trace) {
+			$file = new SplFileInfo($trace['file']);
+			echo('<p>' . ($index + 1) . '. <code>' . $file->getPath() . DIRECTORY_SEPARATOR . '<strong>' . $file->getFilename() . ':' . $trace['line'] . '</strong></code></p>');
+		}
+	}
+
+	http_response_code($statusCode);
+}
+
 
 // routes
 $default = [
@@ -46,7 +64,8 @@ $controller = __NAMESPACE__ . '\\Controllers\\' . $controller . 'Controller';
 
 // check if controller class exists
 if (class_exists($controller) === false) {
-	exit('Failed: controller class does not exist');
+	fail('Failed: controller class does not exist', 500);
+	exit;
 }
 
 $self = new $controller;

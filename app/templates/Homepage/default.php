@@ -5,7 +5,11 @@
 		<?php include(__DIR__ . '/../components/adminMenu.php'); ?>
 	</div>
 	<div class="col-10">
-		<p class="lead">TODO add some javascript</p>		
+		<ul class="list-unstyled">
+			<?php foreach ($matches as $match): ?>
+			<li><a href="match"><?=$match['id']?></a></li>
+			<?php endforeach; ?>
+		</ul>
 	</div>
 </div>
 

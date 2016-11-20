@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App;
 use App\User;
 use App\View;
 use App\Models\User\UserManager;
@@ -73,7 +74,8 @@ abstract class AbstractController {
 		// check if action method exists
 		$method = $this->getMethodName($action, $_SERVER['REQUEST_METHOD']);
 		if (method_exists($this, $method) === false) {
-			exit('Failed: action method does not exist');
+			App\fail('Failed: action method does not exist', 500);
+			exit;
 		}
 
 		// run the action method

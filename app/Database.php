@@ -11,20 +11,15 @@ use \PDOException;
  */
 class Database {
 
-	const SQL_HOST = 'localhost';
-	const SQL_DBNAME = 'eii_pw';
-	const SQL_USERNAME = 'admin';
-	const SQL_PASSWORD = 'admin';
-
 	/** @var \PDO */
 	private $connection;
 
 
 	public function __construct($prefix = null, $debug = false)
 	{
-		$dsn = 'mysql:dbname=' . self::SQL_DBNAME . ';host=' . self::SQL_HOST . ';charset=utf8';
-		$user = self::SQL_USERNAME;
-		$password = self::SQL_PASSWORD;
+		$dsn = 'mysql:dbname=' . SQL_DBNAME . ';host=' . SQL_HOST . ';charset=utf8';
+		$user = SQL_USERNAME;
+		$password = SQL_PASSWORD;
 
 		try {
 			$this->connection = new PDO($dsn, $user, $password);
@@ -45,6 +40,21 @@ class Database {
 	public function getLastInsertId()
 	{
 		return $this->connection->lastInsertId();
+	}
+
+	public function startTransaction()
+	{
+		return $this->connection->beginTransaction();
+	}
+
+	public function commitTransaction()
+	{
+		return $this->connection->commit();
+	}
+
+	public function rollbackTransaction()
+	{
+		return $this->connection->rollBack();
 	}
 	
 }

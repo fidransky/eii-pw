@@ -22,8 +22,15 @@ class PlayerController extends AbstractSecuredController {
 
 	public function getDefault()
 	{
+		$posts = $this->getPosts();
+
 		$this->template['title'] = 'Players';
-		$this->template['players'] = $this->playerManager->getAll();
+		$this->template['players'] = array_map(function($player) use ($posts) {
+			$player['post__raw'] = (int) $player['post'];
+			$player['post'] = $posts[$player['post__raw']];
+
+			return $player;
+		}, $this->playerManager->getAll());
 	}
 
 	public function getAdd()
@@ -44,7 +51,9 @@ class PlayerController extends AbstractSecuredController {
 		$this->template['teams'] = $this->getTeams();
 
 		$this->template['player'] = $this->playerManager->get($id);
-		$this->template['player']['team'] = $this->playerManager->getTeam($id);
+		$this->template['player']['teams'] = array_map(function($team) {
+			return $team['id'];
+		}, $this->playerManager->getTeams($id));
 	}
 
 	public function getDelete()
@@ -64,17 +73,16 @@ class PlayerController extends AbstractSecuredController {
 	public function postAdd()
 	{
 		$data = $this->constructPlayer();
+		$teams = isset($_POST['teams']) ? $_POST['teams'] : [];
 
 		try {
-			$result = $this->playerManager->save($data);
+			$result = $this->playerManager->saveWithTeams($data, $teams);
 
 			$this->addFlashMessage('The player was successfully created.', 'success');
-
 			$path = $this->generatePath('player');
 
 		} catch (\Exception $e) {
 			$this->addFlashMessage('The player was not created.', 'error');
-
 			$path = $this->generatePath('player', 'add');
 		}
 
@@ -86,13 +94,20 @@ class PlayerController extends AbstractSecuredController {
 	{
 		$id = $_GET['playerId'];
 		$data = $this->constructPlayer();
+		$teams = isset($_POST['teams']) ? $_POST['teams'] : [];
 
-		$result = $this->playerManager->save($data, $id);
+		try {
+			$result = $this->playerManager->saveWithTeams($data, $teams, $id);
+
+			$this->addFlashMessage('The player was successfully saved.', 'success');
+			$path = $this->generatePath('player');
+
+		} catch (\Exception $e) {
+			$this->addFlashMessage('The player was not saved.', 'error');
+			$path = $this->generatePath('player', 'edit') . '?playerId=' . $id;
+		}
 
 		// redirect
-		$this->addFlashMessage('The player was successfully saved.', 'success');
-
-		$path = $this->generatePath('player');
 		$this->redirect($path);
 	}
 
@@ -126,7 +141,6 @@ class PlayerController extends AbstractSecuredController {
 			'name' => $_POST['name'],
 			'number' => $_POST['number'],
 			'post' => $_POST['post'],
-			'teamId' => $_POST['team'],
 		];		
 	}
 

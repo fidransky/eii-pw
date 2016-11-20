@@ -22,11 +22,13 @@
 
 	<div class="form-group">
 		<label for="team">Team</label>
-		<select name="team" class="form-control" id="team">
-			<?php foreach ($teams as $key => $team): ?>
-				<option value="<?=$team['id']?>" <?=($team['id'] === $player['team']['id']) ? 'selected' : ''?>><?=$team['name']?></option>
-			<?php endforeach; ?>
-		</select>
+		<?php foreach ($teams as $key => $team): ?>
+			<div class="checkbox">
+				<label for="team-<?=$team['id']?>">
+					<input type="checkbox" name="teams[]" value="<?=$team['id']?>" id="team-<?=$team['id']?>" <?=in_array($team['id'], $player['teams']) ? 'checked' : ''?>> <?=$team['name']?>
+				</label>
+			</div>
+		<?php endforeach; ?>
 	</div>
 
 	<button type="submit" class="btn btn-default">Save</button>
