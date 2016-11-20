@@ -11,6 +11,10 @@ use \PDO;
  */
 abstract class AbstractManager implements IAbstractManager {
 
+	public static $dateFormat = 'Y-m-d';
+	public static $timeFormat = 'H:i:s';
+	public static $datetimeFormat = 'Y-m-d H:i:s';
+
 	/** @var Database */
 	protected $database;
 	/** @var string */

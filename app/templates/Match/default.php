@@ -26,6 +26,11 @@
 				<td>
 					<a href="./match/edit?matchId=<?=$match['id']?>">edit</a>
 					<a href="./match/delete?matchId=<?=$match['id']?>">remove</a>
+					<?php if ($match['state__raw'] === 0): ?>
+						<a href="./match/start?matchId=<?=$match['id']?>">start</a>
+					<?php elseif ($match['state__raw'] === 1): ?>
+						<a href="./match/monitor?matchId=<?=$match['id']?>">monitor</a>
+					<?php endif; ?>
 				</td>
 			</tr>
 			<?php endforeach; ?>

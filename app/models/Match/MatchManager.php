@@ -3,7 +3,10 @@
 namespace App\Models\Match;
 
 use App\Models\AbstractManager;
-use \PDO;
+use App\Models\Team\TeamManager;
+use App\Models\Goal\GoalManager;
+use DateTime;
+use PDO;
 
 
 /**
@@ -11,15 +14,38 @@ use \PDO;
  */
 class MatchManager extends AbstractManager {
 
+	public static $states = ['created', 'ongoing', 'finished'];
+
+	private $teamManager;
+	private $goalManager;
+
+
 	public function __construct()
 	{
 		parent::__construct('`match`');
+
+		$this->teamManager = new TeamManager;
+		$this->goalManager = new GoalManager;
+	}
+
+	public function getCreated()
+	{
+		return $this->database
+			->query('SELECT * FROM ' . $this->tableName . ' WHERE state=0')
+			->fetchAll();
 	}
 
 	public function getOngoing()
 	{
 		return $this->database
 			->query('SELECT * FROM ' . $this->tableName . ' WHERE state=1')
+			->fetchAll();
+	}
+
+	public function getFinished()
+	{
+		return $this->database
+			->query('SELECT * FROM ' . $this->tableName . ' WHERE state=2')
 			->fetchAll();
 	}
 
@@ -97,6 +123,74 @@ class MatchManager extends AbstractManager {
 		return $this->database
 			->query($query, $args)
 			->fetchAll(PDO::FETCH_ASSOC);
+	}
+
+	public function getGoals($matchId, $teamId = null)
+	{
+		return $this->goalManager->getFromMatch($matchId, $teamId);
+	}
+
+	public function setStarted($matchId, $started = 'now')
+	{
+		$match = $this->get($matchId);
+
+		if ($started === 'now') {
+			$now = new DateTime;
+			$started = $now->format(AbstractManager::$datetimeFormat);
+
+			$match['part'] += 1;
+		}
+
+		$match['state'] = 1;
+		$match['started'] = $started;
+
+		return $this->save($match, $matchId);
+	}
+
+	public function setEnded($matchId)
+	{
+		$match = $this->get($matchId);
+
+		$homeTeamGoals = $this->getGoals($match['id'], $match['home_team_id']);
+		$visitingTeamGoals = $this->getGoals($match['id'], $match['visiting_team_id']);
+
+		$match['state'] = 2;
+		$match['started'] = null;
+		$match['home_team_points'] = $homeTeamGoals == $visitingteamgoals ? 1 : ($homeTeamGoals > $visitingTeamGoals ? 3 : 0);
+		$match['visiting_team_points'] = $homeTeamGoals == $visitingTeamGoals ? 1 : ($homeTeamGoals > $visitingTeamGoals ? 0 : 3);
+
+		return $this->save($match, $matchId);
+	}
+
+	public function process($match, $processNested = false)
+	{
+		$match['homeTeam'] = $this->teamManager->get($match['home_team_id']);
+		$match['visitingTeam'] = $this->teamManager->get($match['visiting_team_id']);
+
+		$match['homeTeam']['goals'] = $this->getGoals($match['id'], $match['home_team_id']);
+		$match['visitingTeam']['goals'] = $this->getGoals($match['id'], $match['visiting_team_id']);
+		if ($processNested) {
+			$match['homeTeam']['goals'] = array_map([$this->goalManager, 'process'], $match['homeTeam']['goals']);
+			$match['visitingTeam']['goals'] = array_map([$this->goalManager, 'process'], $match['visitingTeam']['goals']);
+		}
+
+		$match['date__raw'] = $match['date'];
+		$match['date'] = new DateTime($match['date__raw']);
+
+		$match['state__raw'] = (int) $match['state'];
+		$match['state'] = self::$states[$match['state__raw']];
+
+		$match['started__raw'] = $match['started'];
+		if ($match['started__raw'] !== null) {
+			$match['started'] = new DateTime($match['started__raw']);
+
+			$now = new DateTime;
+			$match['time'] = $now->diff(new DateTime($match['started__raw']));
+		} else {
+			$match['time'] = null;
+		}
+
+		return $match;
 	}
 
 }

@@ -3,13 +3,16 @@
 namespace App\Models\Player;
 
 use App\Models\AbstractManager;
-use \PDO;
+use PDO;
 
 
 /**
  * @author Pavel Fidransky [jsem@pavelfidransky.cz]
  */
 class PlayerManager extends AbstractManager {
+
+	public static $posts = ['goalkeeper', 'defender', 'midfielder', 'forward'];
+
 
 	public function __construct()
 	{
@@ -83,6 +86,14 @@ class PlayerManager extends AbstractManager {
 		return $this->database
 			->query($query, $args)
 			->fetchAll(PDO::FETCH_ASSOC);
+	}
+
+	public function process($player)
+	{
+		$player['post__raw'] = (int) $player['post'];
+		$player['post'] = self::$posts[$player['post__raw']];
+
+		return $player;
 	}
 
 }

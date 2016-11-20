@@ -52,20 +52,12 @@
 		</ol>
 	</div>
 
-	<div class="form-group">
-		<label for="state">State</label>
-		<select class="form-control" id="state" disabled>
-			<?php foreach ($states as $key => $state): ?>
-				<option value="<?=$key?>"><?=$state?></option>
-			<?php endforeach; ?>
-		</select>
-	</div>
-
 	<input type="hidden" name="state" value="0">
 
 	<button type="submit" class="btn btn-default">Save</button>
 </form>
 
+<script src="<?=$basePath?>js/ajax.js"></script>
 <script>
 var homeTeamPlayersList = document.getElementById('homeTeamPlayers');
 
@@ -98,7 +90,7 @@ selectors.forEach(function(selector) {
 
 	// update players' list on team change
 	selector.id.addEventListener('change', function(e) {
-		getAjax('<?=$teamChangedHandler?>?teamId=' + this.value, function(data) {
+		ajax.get('<?=$teamChangedHandler?>?teamId=' + this.value, function(data) {
 			var players = JSON.parse(data);
 
 			// clear the list of select fields
@@ -144,16 +136,4 @@ selectors.forEach(function(selector) {
 		item.addEventListener('focus', selectCallback);
 	});
 });
-
-function getAjax(url, success) {
-	var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
-	xhr.open('GET', url);
-	xhr.onreadystatechange = function() {
-		if (xhr.readyState > 3 && xhr.status === 200) success(xhr.responseText);
-	};
-	xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-	xhr.send();
-
-	return xhr;
-}
 </script>

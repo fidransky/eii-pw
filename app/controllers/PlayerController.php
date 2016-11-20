@@ -23,7 +23,7 @@ class PlayerController extends AbstractSecuredController {
 	public function getDefault()
 	{
 		$this->template['title'] = 'Players';
-		$this->template['players'] = array_map([$this, 'processPlayer'], $this->playerManager->getAll());
+		$this->template['players'] = array_map([$this->playerManager, 'process'], $this->playerManager->getAll());
 	}
 
 	public function getAdd()
@@ -37,13 +37,14 @@ class PlayerController extends AbstractSecuredController {
 	public function getEdit()
 	{
 		$id = $_GET['playerId'];
+		$player = $this->playerManager->get($id);
 
 		$this->template['title'] = 'Edit player';
-		$this->template['editHandler'] = $this->generatePath('player', 'edit') . '?teamId=' . $id;
+		$this->template['editHandler'] = $this->generatePath('player', 'edit') . '?playerId=' . $id;
 		$this->template['posts'] = $this->getPosts();
 		$this->template['teams'] = $this->getTeams();
 
-		$this->template['player'] = $this->processPlayer($this->playerManager->get($id));
+		$this->template['player'] = $this->playerManager->process($player);
 		$this->template['player']['teams'] = array_map(function($team) {
 			return $team['id'];
 		}, $this->playerManager->getTeams($id));
@@ -111,14 +112,7 @@ class PlayerController extends AbstractSecuredController {
 
 	private function getPosts()
 	{
-		$posts = [];
-
-		$posts[] = 'goalkeeper';
-		$posts[] = 'defender';
-		$posts[] = 'midfielder';
-		$posts[] = 'forward';
-
-		return $posts;
+		return PlayerManager::$posts;
 	}
 
 	private function constructPlayer()
@@ -135,14 +129,6 @@ class PlayerController extends AbstractSecuredController {
 			'number' => $_POST['number'],
 			'post' => $_POST['post'],
 		];		
-	}
-
-	private function processPlayer($player)
-	{
-		$player['post__raw'] = (int) $player['post'];
-		$player['post'] = $posts[$player['post__raw']];
-
-		return $player;
 	}
 
 }

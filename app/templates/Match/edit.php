@@ -3,7 +3,7 @@
 <form action="<?=$editHandler?>" method="post">
 	<div class="form-group">
 		<label for="date">Date and time</label>
-		<input type="datetime-local" name="date" value="<?=$match['date']->format('Y-m-d\TH:i:s')?>" class="form-control" required>
+		<input type="datetime-local" name="date" value="<?=$match['date']->format(HTML5_DATETIME_FORMAT)?>" class="form-control" required>
 	</div>
 
 	<div class="form-group">
@@ -42,17 +42,9 @@
 		</ol>
 	</div>
 
-	<div class="form-group">
-		<label for="state">State</label>
-		<select name="state" class="form-control" id="state">
-			<?php foreach ($states as $key => $state): ?>
-				<option value="<?=$key?>" <?=($key === $match['state__raw']) ? 'selected' : ''?>><?=$state?></option>
-			<?php endforeach; ?>
-		</select>
-	</div>
-
 	<input type="hidden" name="homeTeamId" value="<?=$match['home_team_id']?>">
 	<input type="hidden" name="visitingTeamId" value="<?=$match['visiting_team_id']?>">
+	<input type="hidden" name="state" value="<?=$match['state']?>">
 
 	<button type="submit" class="btn btn-default">Save</button>
 </form>

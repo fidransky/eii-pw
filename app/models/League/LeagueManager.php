@@ -3,7 +3,7 @@
 namespace App\Models\League;
 
 use App\Models\AbstractManager;
-use \PDO;
+use PDO;
 
 
 /**

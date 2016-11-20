@@ -19,8 +19,19 @@ class HomepageController extends AbstractController {
 
 	public function getDefault()
 	{
-		$this->template['title'] = 'Homepage';
-		$this->template['matches'] = $this->matchManager->getOngoing();
+		$this->template['title'] = 'Matches';
+		$this->template['ongoingMatches'] = array_map([$this->matchManager, 'process'], $this->matchManager->getOngoing());
+		$this->template['finishedMatches'] = array_map([$this->matchManager, 'process'], $this->matchManager->getFinished());
+		$this->template['matchStateHandler'] = $this->generatePath('match', 'state');
+	}
+
+	public function getMatch()
+	{
+		$matchId = $_GET['id'];
+		$match = $this->matchManager->get($matchId);
+
+		$this->template['title'] = 'Match';
+		$this->template['match'] = $this->matchManager->process($match, true);
 	}
 	
 }

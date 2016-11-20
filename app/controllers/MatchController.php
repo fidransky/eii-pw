@@ -2,8 +2,10 @@
 
 namespace App\Controllers;
 
+use App\Models\AbstractManager;
 use App\Models\Match\MatchManager;
 use App\Models\Team\TeamManager;
+use App\Models\Goal\GoalManager;
 use DateTime;
 
 
@@ -11,6 +13,7 @@ class MatchController extends AbstractSecuredController {
 
 	private $matchManager;
 	private $teamManager;
+	private $goalManager;
 
 
 	public function __construct()
@@ -19,12 +22,13 @@ class MatchController extends AbstractSecuredController {
 
 		$this->matchManager = new MatchManager;
 		$this->teamManager = new TeamManager;
+		$this->goalManager = new GoalManager;
 	}
 
 	public function getDefault()
 	{
 		$this->template['title'] = 'Matches';
-		$this->template['matches'] = array_map([$this, 'processMatch'], $this->matchManager->getAll());
+		$this->template['matches'] = array_map([$this->matchManager, 'process'], $this->matchManager->getAll());
 	}
 
 	public function getAdd()
@@ -37,25 +41,17 @@ class MatchController extends AbstractSecuredController {
 		$this->template['players'] = $this->teamManager->getPlayers($this->template['teams'][0]['id']);
 	}
 
-	public function getPlayers()
-	{
-		$id = $_GET['teamId'];
-
-		$players = $this->teamManager->getPlayers($id);
-
-		exit(json_encode($players));
-	}
-
 	public function getEdit()
 	{
 		$id = $_GET['matchId'];
+		$match = $this->matchManager->get($id);
 
 		$this->template['title'] = 'Edit match';
 		$this->template['editHandler'] = $this->generatePath('match', 'edit') . '?matchId=' . $id;
 		$this->template['states'] = $this->getStates();
 		$this->template['teams'] = $this->getTeams();
 
-		$this->template['match'] = $this->processMatch($this->matchManager->get($id));
+		$this->template['match'] = $this->matchManager->process($match);
 		$this->template['match']['homeTeamPlayers'] = $this->matchManager->getPlayers($id, $this->template['match']['home_team_id']);
 		$this->template['match']['visitingTeamPlayers'] = $this->matchManager->getPlayers($id, $this->template['match']['visiting_team_id']);
 	}
@@ -68,6 +64,69 @@ class MatchController extends AbstractSecuredController {
 
 		// redirect
 		$this->addFlashMessage('The match was successfully deleted.', 'success');
+
+		$path = $this->generatePath('match');
+		$this->redirect($path);
+	}
+
+	public function getStart()
+	{
+		$id = $_GET['matchId'];
+		$result = $this->matchManager->setStarted($id);
+
+		// redirect
+		$this->addFlashMessage('The match was successfully started.', 'success');
+		$this->addFlashMessage('Monitor changes there.', 'info');
+
+		$path = $this->generatePath('match', 'monitor');
+		$this->redirect($path . '?matchId=' . $id);
+	}
+
+	public function getMonitor()
+	{
+		$id = $_GET['matchId'];
+		$match = $this->matchManager->get($id);
+
+		$this->template['title'] = 'Monitor match';
+		$this->template['scoreGoalHandler'] = $this->generatePath('match', 'score');
+		$this->template['goalTypes'] = $this->getGoalTypes();
+
+		$this->template['match'] = $this->matchManager->process($match);
+		$this->template['match']['homeTeamPlayers'] = $this->matchManager->getPlayers($id, $this->template['match']['home_team_id']);
+		$this->template['match']['visitingTeamPlayers'] = $this->matchManager->getPlayers($id, $this->template['match']['visiting_team_id']);
+	}
+
+	public function getPause()
+	{
+		$id = $_GET['matchId'];
+		$result = $this->matchManager->setStarted($id, null);
+
+		// redirect
+		$this->addFlashMessage('The match was successfully paused.', 'success');
+
+		$path = $this->generatePath('match', 'monitor');
+		$this->redirect($path . '?matchId=' . $id);
+	}
+
+	public function getResume()
+	{
+		$id = $_GET['matchId'];
+		$result = $this->matchManager->setStarted($id);
+
+		// redirect
+		$this->addFlashMessage('The match was successfully resumed.', 'success');
+
+		$path = $this->generatePath('match', 'monitor');
+		$this->redirect($path . '?matchId=' . $id);
+	}
+
+	public function getEnd()
+	{
+		$id = $_GET['matchId'];
+		$match = $this->matchManager->setEnded($id);
+
+		// redirect
+		$this->addFlashMessage('The match was successfully ended.', 'success');
 
 		$path = $this->generatePath('match');
 		$this->redirect($path);
@@ -117,6 +176,54 @@ class MatchController extends AbstractSecuredController {
 		$this->redirect($path);
 	}
 
+	public function postScore()
+	{
+		$id = $_POST['matchId'];
+		$data = $this->constructGoal();
+
+		try {
+			$result = $this->goalManager->save($data);
+
+			$this->addFlashMessage('The goal was successfully saved.', 'success');
+
+		} catch (\Exception $e) {
+			$this->addFlashMessage('The goal was not saved.', 'error');
+		}
+
+		// redirect
+		$path = $this->generatePath('match', 'monitor') . '?matchId=' . $id;
+		$this->redirect($path);
+	}
+
+	/*
+	 * AJAX ENDPOINTS
+	 */
+
+	public function getPlayers()
+	{
+		$id = $_GET['teamId'];
+		$players = $this->teamManager->getPlayers($id);
+
+		echo(json_encode($players));
+		exit;
+	}
+
+	public function getState()
+	{
+		$id = $_GET['matchId'];
+		$match = $this->matchManager->get($id);
+
+		echo(json_encode([
+			'started' => $match['started'] ? strtotime($match['started']) : null,
+			'part' => $match['part'],
+		]));
+		exit;
+	}
+
+	/*
+	 * PRIVATE HELPER METHODS
+	 */
+
 	private function getTeams()
 	{
 		return $this->teamManager->getAll();
@@ -124,13 +231,12 @@ class MatchController extends AbstractSecuredController {
 
 	private function getStates()
 	{
-		$states = [];
+		return MatchManager::$states;
+	}
 
-		$states[] = 'created';
-		$states[] = 'ongoing';
-		$states[] = 'ended';
-
-		return $states;
+	private function getGoalTypes()
+	{
+		return GoalManager::$types;
 	}
 
 	private function constructMatch()
@@ -154,25 +260,31 @@ class MatchController extends AbstractSecuredController {
 			'home_team_id' => $_POST['homeTeamId'],
 			'visiting_team_id' => $_POST['visitingTeamId'],
 			'state' => isset($_POST['state']) ? $_POST['state'] : 0,
+			'started' => null,
 			'home_team_points' => 0,
 			'visiting_team_points' => 0,
 		];		
 	}
 
-	private function processMatch($match)
+	private function constructGoal()
 	{
-		$states = $this->getStates();
+		$id = $_POST['matchId'];
+		$teamId = $_POST['teamId'];
+		$playerId = $_POST['playerId'];
 
-		$match['homeTeam'] = $this->teamManager->get($match['home_team_id']);
-		$match['visitingTeam'] = $this->teamManager->get($match['visiting_team_id']);
+		$match = $this->matchManager->get($id);
 
-		$match['date__raw'] = $match['date'];
-		$match['date'] = new DateTime($match['date__raw']);
+		$now = new DateTime;
+		$time = $now->diff(new DateTime($match['started']));
 
-		$match['state__raw'] = (int) $match['state'];
-		$match['state'] = $states[$match['state__raw']];
-
-		return $match;
+		return [
+			'player_id' => $playerId,
+			'team_id' => $teamId,
+			'match_id' => $id,
+			'type' => $_POST['type'],
+			'part' => $_POST['part'],
+			'time' => $time->format('%H:%I:%S'),
+		];
 	}
 
 }

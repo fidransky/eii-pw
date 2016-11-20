@@ -60,6 +60,13 @@ class View {
 		$flashMessages = $this->flashMessages;
 		$appName = 'App';
 
+		unset($key, $value);
+
+		define('DATETIME_FORMAT', 'F d, H:i');
+		define('HTML5_DATE_FORMAT', 'Y-m-d');
+		define('HTML5_TIME_FORMAT', 'H:i:s');
+		define('HTML5_DATETIME_FORMAT', 'Y-m-d\TH:i:s');
+
 		//var_dump(get_defined_vars());
 		
 		include($templatesPath . 'layout.php');		

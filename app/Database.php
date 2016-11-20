@@ -2,8 +2,8 @@
 
 namespace App;
 
-use \PDO;
-use \PDOException;
+use PDO;
+use PDOException;
 
 
 /**
@@ -11,7 +11,7 @@ use \PDOException;
  */
 class Database {
 
-	/** @var \PDO */
+	/** @var PDO */
 	private $connection;
 
 

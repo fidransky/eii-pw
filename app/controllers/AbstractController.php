@@ -148,6 +148,12 @@ abstract class AbstractController {
 
 			case 'POST':
 				return 'post' . ucfirst($action);
+
+			case 'PUT':
+				return 'put' . ucfirst($action);
+
+			case 'DELETE':
+				return 'delete' . ucfirst($action);
 		}		
 	}
 
