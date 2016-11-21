@@ -332,6 +332,10 @@ select.form-control {
 
 /* page styles */
 
+.match-list li {
+	margin: 8px 0;
+}
+
 ul .link-list-item {
 	text-decoration: none;
 	display: block;

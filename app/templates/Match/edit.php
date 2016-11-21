@@ -44,7 +44,7 @@
 
 	<input type="hidden" name="homeTeamId" value="<?=$match['home_team_id']?>">
 	<input type="hidden" name="visitingTeamId" value="<?=$match['visiting_team_id']?>">
-	<input type="hidden" name="state" value="<?=$match['state']?>">
+	<input type="hidden" name="state" value="<?=$match['state__raw']?>">
 
 	<button type="submit" class="btn btn-default">Save</button>
 </form>

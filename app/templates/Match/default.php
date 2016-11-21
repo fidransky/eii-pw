@@ -21,7 +21,7 @@
 			<tr>
 				<td><?=$match['homeTeam']['name']?></td>
 				<td><?=$match['visitingTeam']['name']?></td>
-				<td><?=$match['date']->format(DATE_RFC2822)?></td>
+				<td><?=$match['date']->format(DATETIME_FORMAT)?></td>
 				<td><?=$match['state']?></td>
 				<td>
 					<a href="./match/edit?matchId=<?=$match['id']?>">edit</a>
