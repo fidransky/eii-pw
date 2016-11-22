@@ -41,7 +41,12 @@
 				<div id="navbar" class="collapse navbar-collapse">
 					<ul class="nav navbar-nav">
 						<li><a href="./">Home</a></li>
-						<?php if (!$user->isLoggedIn()): ?>
+						<?php if ($user->isLoggedIn()): ?>
+							<li><a href="./league">Leagues</a></li>
+							<li><a href="./team">Teams</a></li>
+							<li><a href="./player">Players</a></li>
+							<li><a href="./match">Matches</a></li>
+						<?php else: ?>
 							<li><a href="./log/in">Log in</a></li>
 							<li><a href="./sign/in">Sign in</a></li>
 						<?php endif; ?>

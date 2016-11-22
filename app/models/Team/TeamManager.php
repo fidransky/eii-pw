@@ -88,7 +88,7 @@ class TeamManager extends AbstractManager {
 
 	public function getPlayers($teamId)
 	{
-		$query = 'SELECT player.* FROM team_player LEFT JOIN player ON player.id = team_player.player_id WHERE team_player.team_id = :teamId';
+		$query = 'SELECT player.*, team_player.id AS team_player_id FROM team_player LEFT JOIN player ON player.id = team_player.player_id WHERE team_player.team_id = :teamId';
 		$args = [
 			':teamId' => $teamId,
 		];

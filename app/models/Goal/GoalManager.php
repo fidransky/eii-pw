@@ -25,13 +25,13 @@ class GoalManager extends AbstractManager {
 
 	public function getFromMatch($matchId, $teamId = null)
 	{
-		$query = 'SELECT * FROM ' . $this->tableName . ' WHERE match_id = :matchId';
+		$query = 'SELECT * FROM ' . $this->tableName . ' LEFT JOIN team_player ON team_player.id = goal.team_player_id WHERE match_id = :matchId';
 		$args = [
 			':matchId' => $matchId,
 		];
 
 		if ($teamId) {
-			$query .= ' AND team_id = :teamId';
+			$query .= ' AND team_player.team_id = :teamId';
 			$args[':teamId'] = $teamId;
 		}
 

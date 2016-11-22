@@ -10,6 +10,7 @@
 		<thead>
 			<tr>
 				<th>Name</th>
+				<th>Number</th>
 				<th>Post</th>
 				<td></td>
 			</tr>
@@ -18,6 +19,7 @@
 			<?php foreach ($players as $player): ?>
 			<tr>
 				<td><?=$player['name']?></td>
+				<td><?=$player['number']?></td>
 				<td><?=$player['post']?></td>
 				<td>
 					<a href="./player/edit?playerId=<?=$player['id']?>">edit</a>

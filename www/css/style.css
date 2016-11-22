@@ -25,11 +25,19 @@ ul {
 	padding-left: 0;
 }
 
+ol {
+	padding-left: 1rem;
+}
+
 /* grid system */
 
 .row, 
 [class^="col-"] {
 	box-sizing: border-box;
+}
+
+.row {
+	margin-bottom: 16px;
 }
 
 .row:before,
@@ -191,7 +199,22 @@ select.form-control {
 	border: 1px solid #ccc;
 }
 
-.box ul {
+.box h1,
+.box h2,
+.box h3 {
+	margin-top: 0.5em;
+}
+
+.box p:first-child {
+	margin-top: 0;
+}
+
+.box p:last-child {
+	margin-bottom: 0;
+}
+
+.box ul,
+.box ol {
 	margin: 0;
 }
 
@@ -336,7 +359,13 @@ select.form-control {
 	margin: 8px 0;
 }
 
-ul .link-list-item {
+ul .link-list-item:not(:last-child) {
+	margin-bottom: 8px;
+	padding-bottom: 8px;
+	border-bottom: 1px solid #ccc;
+}
+
+ul .link-list-item a {
 	text-decoration: none;
 	display: block;
 }

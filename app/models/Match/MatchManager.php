@@ -5,6 +5,7 @@ namespace App\Models\Match;
 use App\Models\AbstractManager;
 use App\Models\Team\TeamManager;
 use App\Models\Goal\GoalManager;
+use App\Models\Player\PlayerManager;
 use DateTime;
 use PDO;
 
@@ -18,6 +19,7 @@ class MatchManager extends AbstractManager {
 
 	private $teamManager;
 	private $goalManager;
+	private $playerManager;
 
 
 	public function __construct()
@@ -26,6 +28,7 @@ class MatchManager extends AbstractManager {
 
 		$this->teamManager = new TeamManager;
 		$this->goalManager = new GoalManager;
+		$this->playerManager = new PlayerManager;
 	}
 
 	public function getCreated()
@@ -58,8 +61,8 @@ class MatchManager extends AbstractManager {
 			$result = $this->save($data, $id);
 
 			if ($result) {
-				$insertQuery = 'INSERT INTO lineup(match_id, player_id) VALUES (:matchId, :playerId)';
-				$deleteQuery = 'DELETE FROM lineup WHERE match_id = :matchId AND player_id = :playerId';
+				$insertQuery = 'INSERT INTO lineup(match_id, team_player_id) VALUES (:matchId, :teamPlayerId)';
+				$deleteQuery = 'DELETE FROM lineup WHERE match_id = :matchId AND team_player_id = :teamPlayerId';
 
 				if ($id) {
 					$originalPlayers = array_map(function($player) {
@@ -76,10 +79,10 @@ class MatchManager extends AbstractManager {
 				}
 
 				// save leagues
-				foreach ($added as $playerId) {
+				foreach ($added as $teamPlayerId) {
 					$args = [
 						':matchId' => $id,
-						':playerId' => $playerId,
+						':teamPlayerId' => $teamPlayerId,
 					];
 
 					$this->database->query($insertQuery, $args);
@@ -88,7 +91,7 @@ class MatchManager extends AbstractManager {
 				foreach ($removed as $teamId) {
 					$args = [
 						':matchId' => $id,
-						':playerId' => $playerId,
+						':teamPlayerId' => $teamPlayerId,
 					];
 
 					$this->database->query($deleteQuery, $args);
@@ -108,16 +111,14 @@ class MatchManager extends AbstractManager {
 
 	public function getPlayers($matchId, $teamId = null)
 	{
-		$query = 'SELECT player.* FROM lineup LEFT JOIN player ON player.id = lineup.player_id WHERE lineup.match_id = :matchId';
+		$query = 'SELECT player.*, lineup.team_player_id AS team_player_id FROM lineup LEFT JOIN team_player ON team_player.id = lineup.team_player_id LEFT JOIN player ON player.id = team_player.player_id WHERE lineup.match_id = :matchId';
 		$args = [
 			':matchId' => $matchId,
 		];
 
 		if ($teamId) {
-			/* TODO how do I do that? add team_id column to lineup table?
-			$query .= ' AND player.team_id = :teamId';
+			$query .= ' AND team_player.team_id = :teamId';
 			$args[':teamId'] = $teamId;
-			*/
 		}
 
 		return $this->database
@@ -166,6 +167,13 @@ class MatchManager extends AbstractManager {
 	{
 		$match['homeTeam'] = $this->teamManager->get($match['home_team_id']);
 		$match['visitingTeam'] = $this->teamManager->get($match['visiting_team_id']);
+
+		$match['homeTeam']['players'] = $this->getPlayers($match['id'], $match['home_team_id']);
+		$match['visitingTeam']['players'] = $this->getPlayers($match['id'], $match['visiting_team_id']);
+		if ($processNested) {
+			$match['homeTeam']['players'] = array_map([$this->playerManager, 'process'], $match['homeTeam']['players']);
+			$match['visitingTeam']['players'] = array_map([$this->playerManager, 'process'], $match['visitingTeam']['players']);
+		}
 
 		$match['homeTeam']['goals'] = $this->getGoals($match['id'], $match['home_team_id']);
 		$match['visitingTeam']['goals'] = $this->getGoals($match['id'], $match['visiting_team_id']);

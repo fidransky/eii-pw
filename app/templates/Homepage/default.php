@@ -1,47 +1,40 @@
-<h1><?=$title?></h1>
+<h1><?=$pageTitle?></h1>
 
-<div class="row">
-	<div class="col-2">
-		<?php include(__DIR__ . '/../components/adminMenu.php'); ?>
-	</div>
-	<div class="col-10">
-		<ul class="match-list list-unstyled" id="matches">
-			<?php foreach ($ongoingMatches as $match): ?>
-			<li id="match-<?=$match['id']?>" data-id="<?=$match['id']?>" data-started="<?=$match['started'] ? $match['started']->getTimestamp() : ''?>" data-part="<?=$match['part']?>">
-				<a href="./homepage/match?id=<?=$match['id']?>" class="match link-list-item">
-					<strong>
-						<?=$match['homeTeam']['name']?>
-						<?=count($match['homeTeam']['goals'])?>:<?=count($match['visitingTeam']['goals'])?>
-						<?=$match['visitingTeam']['name']?>
-					</strong>
-					<span class="match-state"><span id="matchPart">part <?=$match['part']?></span>, <span id="matchTime"><?=$match['time'] ? (($match['time']->format('%i') + 1) . '′') : 'paused'?></span></span>
-					<span class="pull-right"><?=$match['date']->format(DATETIME_FORMAT)?></span>
-				</a>
-			</li>
-			<?php endforeach; ?>
-		</ul>
+<ul class="match-list list-unstyled" id="matches">
+	<?php foreach ($ongoingMatches as $match): ?>
+	<li id="match-<?=$match['id']?>" class="match link-list-item" data-id="<?=$match['id']?>" data-started="<?=$match['started'] ? $match['started']->getTimestamp() : ''?>" data-part="<?=$match['part']?>">
+		<a href="./homepage/match?id=<?=$match['id']?>">
+			<strong>
+				<?=$match['homeTeam']['name']?>
+				<?=count($match['homeTeam']['goals'])?>:<?=count($match['visitingTeam']['goals'])?>
+				<?=$match['visitingTeam']['name']?>
+			</strong>
+			<span class="match-state"><span id="matchPart">part <?=$match['part']?></span>, <span id="matchTime"><?=$match['time'] ? (($match['time']->format('%i') + 1) . '′') : 'paused'?></span></span>
+			<span class="pull-right"><?=$match['date']->format(DATETIME_FORMAT)?></span>
+		</a>
+	</li>
+	<?php endforeach; ?>
+</ul>
 
-		<?php if (count($ongoingMatches) > 0): ?>
-			<hr>
-		<?php endif; ?>
+<?php if (count($ongoingMatches) > 0): ?>
+	<hr>
+<?php endif; ?>
 
-		<ul class="match-list list-unstyled">
-			<?php foreach ($finishedMatches as $match): ?>
-			<li>
-				<a href="./homepage/match?id=<?=$match['id']?>" class="match link-list-item">
-					<strong>
-						<?=$match['homeTeam']['name']?>
-						<?=count($match['homeTeam']['goals'])?>:<?=count($match['visitingTeam']['goals'])?>
-						<?=$match['visitingTeam']['name']?>
-					</strong>
-					<span class="match-state">finished</span>
-					<span class="pull-right"><?=$match['date']->format(DATETIME_FORMAT)?></span>
-				</a>
-			</li>
-			<?php endforeach; ?>
-		</ul>
-	</div>
-</div>
+<ul class="match-list list-unstyled">
+	<?php foreach ($finishedMatches as $match): ?>
+	<li class="match link-list-item">
+		<a href="./homepage/match?id=<?=$match['id']?>">
+			<strong>
+				<?=$match['homeTeam']['name']?>
+				<?=count($match['homeTeam']['goals'])?>:<?=count($match['visitingTeam']['goals'])?>
+				<?=$match['visitingTeam']['name']?>
+			</strong>
+			<span class="match-state">finished</span>
+			<span class="pull-right"><?=$match['date']->format(DATETIME_FORMAT)?></span>
+		</a>
+	</li>
+	<?php endforeach; ?>
+</ul>
 
 <script src="<?=$basePath?>js/ajax.js"></script>
 <script>

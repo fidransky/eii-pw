@@ -4,7 +4,7 @@
 	<?=$match['homeTeam']['name']?>
 	<?=count($match['homeTeam']['goals'])?>:<?=count($match['visitingTeam']['goals'])?>
 	<?=$match['visitingTeam']['name']?>,
-	<span class="match-state">part <?=$match['part']?>, <span id="matchTime"><?=$match['time'] ? (($match['time']->format('%i') + 1) . '′') : 'paused'?></span></span>
+	<span class="match-state">part <?=$match['part']?>, <span id="matchTime"><?=$match['time'] ? ($match['time']->format('%i') . '′ ' . $match['time']->format('%s') . '″') : 'paused'?></span></span>
 </h2>
 
 <div class="row">
@@ -12,10 +12,10 @@
 		<strong><?=$match['homeTeam']['name']?></strong>
 
 		<form action="<?=$scoreGoalHandler?>" method="post">
-			<select name="playerId">
+			<select name="teamPlayerId">
 				<option value="" selected>select player</option>
 				<?php foreach ($match['homeTeamPlayers'] as $player): ?>
-					<option value="<?=$player['id']?>"><?=$player['name']?></option>
+					<option value="<?=$player['team_player_id']?>"><?=$player['name']?></option>
 				<?php endforeach; ?>
 			</select>
 
@@ -36,10 +36,10 @@
 		<strong><?=$match['visitingTeam']['name']?></strong>
 
 		<form action="<?=$scoreGoalHandler?>" method="post">
-			<select name="playerId">
+			<select name="teamPlayerId">
 				<option value="" selected>select player</option>
 				<?php foreach ($match['visitingTeamPlayers'] as $player): ?>
-					<option value="<?=$player['id']?>"><?=$player['name']?></option>
+					<option value="<?=$player['team_player_id']?>"><?=$player['name']?></option>
 				<?php endforeach; ?>
 			</select>
 
@@ -75,25 +75,20 @@ var pauseButton = document.getElementById('pauseButton');
 setInterval(function() {
 	if (started) {
 		var now = new Date();
-		var minutes = (now - started) / 1000 / 60;
-		text = Math.ceil(minutes) + '′';
+		var seconds = (now - started) / 1000;
+		var minutes = seconds / 60;
+		text = Math.floor(minutes) + '′ ' + (Math.ceil(seconds % 60) - 1) + '″';
+
+		// add CSS class to pause button after 45 minutes played
+		if (minutes > 45) {
+			pauseButton.classList.remove('btn-default');
+			pauseButton.classList.add('btn-primary');
+		}
+
 	} else {
 		text = 'paused';
 	}
 
 	document.getElementById('matchTime').textContent = text;
 }, 1 * 1000);
-
-// update every 10 seconds to add CSS class to pause button after 45 minutes played
-setInterval(function() {
-	if (started) return;
-
-	var now = new Date();	
-	var minutes = (now - started) / 1000 / 60;
-
-	if (minutes > 45) {
-		pauseButton.classList.remove('btn-default');
-		pauseButton.classList.add('btn-primary');
-	}
-}, 10 * 1000);
 </script>

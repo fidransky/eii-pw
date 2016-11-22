@@ -22,7 +22,7 @@
 				<select name="homeTeamPlayers[]" class="form-control">
 					<option value="" selected>select player</option>
 					<?php foreach ($players as $player): ?>
-						<option value="<?=$player['id']?>"><?=$player['name']?></option>
+						<option value="<?=$player['team_player_id']?>"><?=$player['name']?></option>
 					<?php endforeach; ?>
 				</select>
 			</li>
@@ -45,7 +45,7 @@
 				<select name="visitingTeamPlayers[]" class="form-control">
 					<option value="" selected>select player</option>
 					<?php foreach ($players as $player): ?>
-						<option value="<?=$player['id']?>"><?=$player['name']?></option>
+						<option value="<?=$player['team_player_id']?>"><?=$player['name']?></option>
 					<?php endforeach; ?>
 				</select>
 			</li>
@@ -121,7 +121,7 @@ selectors.forEach(function(selector) {
 			// players list
 			players.forEach(function(player) {
 				var option = document.createElement('option');
-				option.setAttribute('value', player.id);
+				option.setAttribute('value', player.team_player_id);
 
 				var label = document.createTextNode(player.name);
 				option.appendChild(label);

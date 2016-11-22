@@ -269,8 +269,7 @@ class MatchController extends AbstractSecuredController {
 	private function constructGoal()
 	{
 		$id = $_POST['matchId'];
-		$teamId = $_POST['teamId'];
-		$playerId = $_POST['playerId'];
+		$teamPlayerId = $_POST['teamPlayerId'];
 
 		$match = $this->matchManager->get($id);
 
@@ -278,8 +277,7 @@ class MatchController extends AbstractSecuredController {
 		$time = $now->diff(new DateTime($match['started']));
 
 		return [
-			'player_id' => $playerId,
-			'team_id' => $teamId,
+			'team_player_id' => $teamPlayerId,
 			'match_id' => $id,
 			'type' => $_POST['type'],
 			'part' => $_POST['part'],
