@@ -65,6 +65,9 @@
 			</ul>
 		<?php endif; ?>
 	</div>
+
+	<?php $part = 1; ?>
+
 	<div class="col-6 box">
 		<?php if (count($match['visitingTeam']['goals']) === 0): ?>
 			<p class="text-muted">There are no goals scored by the visiting team.</p>

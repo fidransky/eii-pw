@@ -78,7 +78,7 @@ class MatchManager extends AbstractManager {
 					$removed = [];
 				}
 
-				// save leagues
+				// save players
 				foreach ($added as $teamPlayerId) {
 					$args = [
 						':matchId' => $id,
